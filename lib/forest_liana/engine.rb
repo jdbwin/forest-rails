@@ -36,6 +36,14 @@ module ForestLiana
       File.basename($0) == 'rake'
     end
 
+    def pending_migrations
+      return false unless ActiveRecord::Base.connected? && ActiveRecord::Migrator.needs_migration?
+
+      FOREST_LOGGER.error("Pending migrations prevented Forest from running.") and return true
+    end
+
+    return if pending_migrations
+
     error = configure_forest_cors unless ENV['FOREST_CORS_DEACTIVATED']
 
     config.after_initialize do |app|
